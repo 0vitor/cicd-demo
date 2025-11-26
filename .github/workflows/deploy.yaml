@@ -1,0 +1,32 @@
+on:
+  push:
+  branches:
+    - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout repository
+        run: actions/checkout@v4
+
+      - name: Login docker
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER-HUB-USERNAME }}
+          password: ${{ secrets.DOCKER-HUB-PASSWORD }}
+
+      - name: Set image tag
+        id: vars
+        run: |
+          echo "IMAGE_TAG=latest" >> $GITHUB_ENV
+
+      - name: Build e push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./CicdDemo.Api/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKER-HUB-USERNAME }}/cicd:{{ env.IMAGE_TAG }}
